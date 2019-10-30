@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.ysd.demo.dao.ConSumeLogsMapper">
+ <!-- 映射 -->
+	<resultMap type="ConSumeLogs" id="ConSumeLogsId">
+		<id property="Id" column="Id"/>
+		<result property="readRoom.readRoomName" column="readRoomName" />
+	</resultMap>
+ <!--添加日志记录  -->
+ <insert id="insertConSumeLogs" parameterType="conSumeLogs">
+ INSERT into consumelogs(cardNo,readRoomId,inTime,outTime,status) VALUES(#{cardNo},#{readRoomId},#{inTime},NULL,1)
+ </insert>
+ <!--修改状态-->
+ <update id="updateStatus" parameterType="conSumeLogs">
+<!-- UPDATE consumelogs SET status=0,outTime=#{outTime} where cardNo=#{cardNo} -->
+ UPDATE consumelogs SET status=0,outTime=#{outTime}
+ where Id=(SELECT MAX(Id) from (SELECT* from consumelogs b where b.cardNo=#{cardNo})a)  and cardNo=#{cardNo}
+ </update>
+ <!--查询所在图书馆  -->
+ <select id="selectReadRoom" resultMap="ConSumeLogsId" parameterType="string">
+ SELECT * from consumelogs c,readroom r where c.readRoomId=r.readRoomId and c.cardNo=#{cardNo}  and c.`status`=1 
+ </select>
+ <!--柱状图 -->
+ <select id="seleltReadroomOne" resultType="map">
+ SELECT COUNT(DISTINCT cardNo) as value,r.readRoomName as name from consumelogs c ,readroom r where c.readRoomId=r.readRoomId GROUP BY r.readRoomName
+ </select>
+ <!--饼图  -->
+ <select id="selectTeacherNum" resultType="map">
+ SELECT COUNT(DISTINCT cardNo)  as value,s.sectionName as name from consumelogs c,teacher t,section s,readroom r where c.readRoomId=r.readRoomId and c.cardNo=t.teacherCardId and t.sectionId=s.sectionId GROUP BY  s.sectionName
+ </select>
+  <!--饼图  -->
+ <select id="selectStudentNum" resultType="map">
+SELECT COUNT(DISTINCT cardNo) as value,m.memberShipDepartment as name from consumelogs c,readroom r,student s,membership m where c.readRoomId=r.readRoomId and c.cardNo=s.studentCardId and s.memberShipId=m.memberShipId GROUP BY m.memberShipDepartment
+ </select>
+ <!-- 折线图 -->
+ <select id="selectConSumeLogsNum" resultType="map">
+SELECT r.readRoomName as name,c.inTime,COUNT(*) as value from consumelogs c,readroom r where c.readRoomId=r.readRoomId GROUP BY r.readRoomName,c.inTime
+ </select>
+ </mapper>

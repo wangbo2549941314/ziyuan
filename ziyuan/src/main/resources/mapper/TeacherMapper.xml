@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysd.demo.dao.TeacherMapper">
+	<resultMap type="teacher" id="teacherid">
+		<id column="teacherId" property="teacherId"></id>
+		<result column="sectionName" property="section.sectionName" />
+	</resultMap>
+	<!-- 查询所有老师 -->
+	<select id="selectTeacher" resultMap="teacherid"
+		parameterType="fenye">
+		SELECT * from teacher t,section s where
+		t.sectionId=s.sectionId limit
+		#{page},#{pageSize}
+	</select>
+	<!--查询总数量 -->
+	<select id="selectCountTeacher" resultType="int"
+		parameterType="fenye">
+		SELECT COUNT(*) FROM teacher limit #{page},#{pageSize}
+	</select>
+	<!--根据卡号查询老师 -->
+	<select id="selectTeacherCardId" resultType="teacher"
+		parameterType="string">
+		SELECT * from teacher where
+		teacherCardId=#{studentCardId}
+	</select>
+	<!--修改卡号状态(进入) -->
+	<update id="updateTeacherStatuIn" parameterType="teacher">
+		UPDATE teacher
+		SET teacherStatus=1 where teacherCardId=#{teacherCardId}
+	</update>
+	<!--修改卡号状态(进出) -->
+	<update id="updateTeacherStatuOut" parameterType="teacher">
+		UPDATE teacher
+		SET teacherStatus=0 where teacherCardId=#{teacherCardId}
+	</update>
+	<!-- 导出 -->
+	<select id="selectT" resultMap="teacherid" parameterType="list">
+		SELECT * from teacher t,section s where t.sectionId=s.sectionId and  teacherId in(
+		<foreach collection="list" item="tid" separator=",">
+		#{tid}
+		</foreach>
+		)
+	</select>
+	<!-- 导入 -->
+	<!-- 查询看是否卡号，姓名有重复 -->
+	<select id="queryList" resultType="teacher">
+		select `teacherName`,`teacherCardId` from teacher
+		<where>
+			<if test="certNumArray != null and certNumArray != ''">
+				and teacherCardId in
+				<foreach item="teacherCardId" collection="certNumArray"
+					open="(" separator="," close=")">
+					#{teacherCardId}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<!-- 添加 -->
+	<insert id="saveExcelList" parameterType="java.util.List">
+		INSERT INTO
+		teacher(teacherCardId,teacherName,teacherSex,sectionId,teacherStatus,teacherRemark)
+		VALUES
+		<foreach item="item" collection="personInfoList" separator=",">
+			(#{item.teacherCardId},
+			#{item.teacherName},
+			#{item.teacherSex},
+			#{item.sectionId},
+			#{item.teacherStatus},
+			#{item.teacherRemark}
+			)
+		</foreach>
+	</insert>
+	<!-- 级联操作 -->
+	<select id="selectSection" parameterType="string"
+		resultType="section">
+		SELECT sectionId from section where sectionName=#{sectionName}
+	</select>
+</mapper>

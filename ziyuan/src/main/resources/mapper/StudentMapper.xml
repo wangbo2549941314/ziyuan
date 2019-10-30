@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysd.demo.dao.StudentMapper">
+	<!-- 映射 -->
+	<resultMap type="student" id="studentId">
+		<id property="studentId" column="studentId"/>
+		<result property="membership.memberShipDepartment" column="memberShipDepartment" />
+		<result property="membership.memberShipSpeciaty" column="memberShipSpeciaty" />
+		<result property="membership.memberShipDegree" column="memberShipDegree" />
+	</resultMap>
+	<!-- 查询所有学生 -->
+	<select id="selectStudent" resultMap="studentId" parameterType="fenye">
+		SELECT * from student s,membership m WHERE s.memberShipId=m.memberShipId limit #{page},#{pageSize}
+	</select>
+	<!-- 查询学生数量 -->
+	<select id="selectCountStudent" resultType="int"
+		parameterType="fenye">
+		SELECT COUNT(*) FROM student limit #{page},#{pageSize}
+	</select>
+	<!-- 根据卡号查询学生 -->
+	<select id="selectCard" resultType="student" parameterType="string">
+	SELECT * from student where studentCardId=#{studentCardId} 
+	</select>
+	<!--修改卡号状态(进入)-->
+	<update id="updateStudentStatus" parameterType="student">
+	UPDATE student set studentStatus=1 where  studentCardId=#{studentCardId}
+	</update>
+	<!--修改卡号状态(进出)-->
+	<update id="updateStudentStatu1" parameterType="student">
+	UPDATE student set studentStatus=0 where  studentCardId=#{studentCardId}
+	</update>
+	<!--导出  -->
+	<select id="selectS" resultMap="studentId" parameterType="java.util.List">
+	SELECT * from student s,membership m WHERE s.memberShipId=m.memberShipId and studentId in(
+		<foreach collection="list" item="sid" separator=",">  
+		<!-- collection表示迭代集合的名称( 是数组类型，还是集合类型（一共有三种类型，分别为List, [](array), Map三种）该参数为必选)，item该参数为必选 -->
+			#{sid}
+		</foreach>
+	)
+	</select>
+
+</mapper>
