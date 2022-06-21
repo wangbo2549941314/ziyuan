@@ -17,7 +17,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<mysql-connector>5.1.39</mysql-connector> <!-- 导入mysql包必须写mysql版本号 即： -->
+		<mysql-connector>8.0.28</mysql-connector> <!-- 导入mysql包必须写mysql版本号 即： -->
 	</properties>
 
 	<dependencies>
